@@ -4,7 +4,7 @@ import DefaultTimer from "./DefaultTimer";
 import DefaultRenderer from "./DefaultRenderer";
 import DefaultTouchProcessor from "./DefaultTouchProcessor";
 
-const getEntitiesFromProps = props =>
+const getEntitiesFromProps = (props) =>
   props.initState ||
   props.initialState ||
   props.state ||
@@ -12,7 +12,7 @@ const getEntitiesFromProps = props =>
   props.initialEntities ||
   props.entities;
 
-const isPromise = obj => {
+const isPromise = (obj) => {
   return !!(
     obj &&
     obj.then &&
@@ -26,7 +26,7 @@ export default class GameEngine extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      entities: null
+      entities: null,
     };
     this.timer = props.timer || new DefaultTimer();
     this.timer.subscribe(this.updateHandler);
@@ -46,11 +46,11 @@ export default class GameEngine extends Component {
 
     this.setState(
       {
-        entities: entities || {}
+        entities: entities || {},
       },
       () => {
         if (this.props.running) this.start();
-      }
+      },
     );
   }
 
@@ -85,7 +85,7 @@ export default class GameEngine extends Component {
     this.dispatch({ type: "stopped" });
   };
 
-  swap = async newEntities => {
+  swap = async (newEntities) => {
     if (isPromise(newEntities)) newEntities = await newEntities;
 
     this.setState({ entities: newEntities || {} }, () => {
@@ -94,26 +94,26 @@ export default class GameEngine extends Component {
     });
   };
 
-  publish = e => {
+  publish = (e) => {
     this.dispatch(e);
   };
 
-  publishEvent = e => {
+  publishEvent = (e) => {
     this.dispatch(e);
   };
 
-  dispatch = e => {
+  dispatch = (e) => {
     setTimeout(() => {
       this.events.push(e);
       if (this.props.onEvent) this.props.onEvent(e);
     }, 0);
   };
 
-  dispatchEvent = e => {
+  dispatchEvent = (e) => {
     this.dispatch(e);
   };
 
-  updateHandler = currentTime => {
+  updateHandler = (currentTime) => {
     let args = {
       touches: this.touches,
       screen: this.screen,
@@ -124,13 +124,13 @@ export default class GameEngine extends Component {
         current: currentTime,
         previous: this.previousTime,
         delta: currentTime - (this.previousTime || currentTime),
-        previousDelta: this.previousDelta
-      }
+        previousDelta: this.previousDelta,
+      },
     };
 
     let newState = this.props.systems.reduce(
       (state, sys) => sys(state, args),
-      this.state.entities
+      this.state.entities,
     );
 
     this.touches.length = 0;
@@ -140,21 +140,21 @@ export default class GameEngine extends Component {
     this.setState({ entities: newState });
   };
 
-  onLayoutHandler = e => {
+  onLayoutHandler = (e) => {
     this.screen = Dimensions.get("window");
     this.layout = e.nativeEvent.layout;
     this.forceUpdate();
   };
 
-  onTouchStartHandler = e => {
+  onTouchStartHandler = (e) => {
     this.touchProcessor.process("start", e.nativeEvent);
   };
 
-  onTouchMoveHandler = e => {
+  onTouchMoveHandler = (e) => {
     this.touchProcessor.process("move", e.nativeEvent);
   };
 
-  onTouchEndHandler = e => {
+  onTouchEndHandler = (e) => {
     this.touchProcessor.process("end", e.nativeEvent);
   };
 
@@ -170,13 +170,11 @@ export default class GameEngine extends Component {
           onTouchMove={this.onTouchMoveHandler}
           onTouchEnd={this.onTouchEndHandler}
         >
-          {this.props.renderer(this.state.entities, this.screen, this.layout)}
+          {this.state.entities &&
+            this.props.renderer(this.state.entities, this.screen, this.layout)}
         </View>
 
-        <View
-          pointerEvents={"box-none"}
-          style={StyleSheet.absoluteFill}
-        >
+        <View pointerEvents={"box-none"} style={StyleSheet.absoluteFill}>
           {this.props.children}
         </View>
       </View>
@@ -190,14 +188,14 @@ GameEngine.defaultProps = {
   renderer: DefaultRenderer,
   touchProcessor: DefaultTouchProcessor({
     triggerPressEventBefore: 200,
-    triggerLongPressEventAfter: 700
+    triggerLongPressEventAfter: 700,
   }),
-  running: true
+  running: true,
 };
 
 const css = StyleSheet.create({
   container: {
-    flex: 1
+    flex: 1,
   },
   entityContainer: {
     flex: 1,
@@ -205,6 +203,6 @@ const css = StyleSheet.create({
     //-- to register touches. If we didn't worry about
     //-- 'children' (foreground) components capturing events,
     //-- this whole shenanigan could be avoided..
-    backgroundColor: "transparent"
-  }
+    backgroundColor: "transparent",
+  },
 });
